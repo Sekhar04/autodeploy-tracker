@@ -70,16 +70,24 @@ public class DeploymentService {
 
         return repo.save(deployment);
     }
-    public void deleteDeployment(Long id) {
 
-        Deployment deployment = getDeploymentById(id);
-
-        repo.delete(deployment);
-    }
     public long countDeploymentsByStatus(
             DeploymentStatus status) {
 
         return repo.countByStatus(status);
+    }
+    public void deleteDeployment(
+            Long id) {
+
+        Deployment deployment =
+                repo.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Deployment not found"
+                                )
+                        );
+
+        repo.delete(deployment);
     }
 
 }

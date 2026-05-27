@@ -450,6 +450,15 @@
 
 <script>
 
+    const token =
+        localStorage.getItem('token');
+
+    if(!token){
+
+        window.location.href =
+            '/login.html';
+    }
+
     function toggleTheme(){
 
         document.body.classList.toggle('dark');
@@ -470,10 +479,28 @@
 
     async function loadDeployments(){
 
+        const token =
+            localStorage.getItem('token');
+
         const response =
             await fetch(
-                'http://localhost:8080/api/deployments'
+                '/api/deployments',
+                {
+                    headers:{
+                        'Authorization':
+                            'Bearer ' + token
+                    }
+                }
             );
+
+        if(response.status === 403){
+
+            alert(
+                'Access Denied'
+            );
+
+            return;
+        }
 
         const deployments =
             await response.json();
@@ -493,8 +520,11 @@
         deployments.forEach(d => {
 
             if(d.status === 'PENDING') pending++;
+
             if(d.status === 'RUNNING') running++;
+
             if(d.status === 'SUCCESS') success++;
+
             if(d.status === 'FAILED') failed++;
 
             table.innerHTML += `
@@ -603,6 +633,9 @@
 
     async function createDeployment(){
 
+        const token =
+            localStorage.getItem('token');
+
         const appName =
             document.getElementById(
                 'appName'
@@ -624,7 +657,10 @@
                 method:'POST',
 
                 headers:{
-                    'Content-Type':'application/json'
+                    'Content-Type':'application/json',
+
+                    'Authorization':
+                        'Bearer ' + token
                 },
 
                 body:JSON.stringify({
@@ -652,13 +688,19 @@
 
     async function updateStatus(id,status){
 
+        const token =
+            localStorage.getItem('token');
+
         await fetch(
             `http://localhost:8080/api/deployments/${id}/status`,
             {
                 method:'PUT',
 
                 headers:{
-                    'Content-Type':'application/json'
+                    'Content-Type':'application/json',
+
+                    'Authorization':
+                        'Bearer ' + token
                 },
 
                 body:JSON.stringify({
@@ -672,10 +714,18 @@
 
     async function deleteDeployment(id){
 
+        const token =
+            localStorage.getItem('token');
+
         await fetch(
             `http://localhost:8080/api/deployments/${id}`,
             {
-                method:'DELETE'
+                method:'DELETE',
+
+                headers:{
+                    'Authorization':
+                        'Bearer ' + token
+                }
             }
         );
 

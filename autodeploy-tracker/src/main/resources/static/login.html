@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Login</title>
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+
+            font-family:'Inter',sans-serif;
+
+            background:#f5f7fb;
+
+            height:100vh;
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+        }
+
+        .login-card{
+
+            width:400px;
+
+            background:white;
+
+            padding:40px;
+
+            border-radius:20px;
+
+            box-shadow:0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        h1{
+
+            font-size:32px;
+
+            margin-bottom:10px;
+
+            color:#111827;
+        }
+
+        p{
+
+            color:#6b7280;
+
+            margin-bottom:30px;
+        }
+
+        input{
+
+            width:100%;
+
+            padding:14px;
+
+            margin-bottom:18px;
+
+            border-radius:12px;
+
+            border:1px solid #d1d5db;
+
+            outline:none;
+
+            font-size:14px;
+        }
+
+        input:focus{
+
+            border-color:#167787;
+        }
+
+        button{
+
+            width:100%;
+
+            padding:14px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#167787;
+
+            color:white;
+
+            font-size:15px;
+
+            font-weight:600;
+
+            cursor:pointer;
+
+            transition:0.3s ease;
+        }
+
+        button:hover{
+
+            background:#125f6c;
+        }
+
+        .error{
+
+            color:red;
+
+            margin-top:15px;
+
+            font-size:14px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="login-card">
+
+    <h1>Welcome Back</h1>
+
+    <p>
+        Login to access the deployment dashboard
+    </p>
+
+    <input type="text"
+           id="username"
+           placeholder="Username">
+
+    <input type="password"
+           id="password"
+           placeholder="Password">
+
+    <button onclick="login()">
+
+        Login
+
+    </button>
+
+    <div class="error"
+         id="errorMessage"></div>
+
+</div>
+
+<script>
+
+    async function login(){
+
+        const username =
+            document.getElementById(
+                'username'
+            ).value;
+
+        const password =
+            document.getElementById(
+                'password'
+            ).value;
+
+        const response = await fetch(
+            'http://localhost:8080/auth/login',
+            {
+
+                method:'POST',
+
+                headers:{
+                    'Content-Type':'application/json'
+                },
+
+                body:JSON.stringify({
+                    username,
+                    password
+                })
+            }
+        );
+
+        if(!response.ok){
+
+            document.getElementById(
+                'errorMessage'
+            ).innerText =
+                'Invalid credentials';
+
+            return;
+        }
+
+        const token =
+            await response.text();
+
+        localStorage.setItem(
+            'token',
+            token
+        );
+
+        window.location.href =
+            '/';
+    }
+
+</script>
+
+</body>
+
+</html>

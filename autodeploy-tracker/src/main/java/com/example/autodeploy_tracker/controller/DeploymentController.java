@@ -2,77 +2,100 @@ package com.example.autodeploy_tracker.controller;
 
 import com.example.autodeploy_tracker.model.Deployment;
 import com.example.autodeploy_tracker.model.DeploymentStatus;
+
 import com.example.autodeploy_tracker.service.DeploymentService;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/deployments")
-
 public class DeploymentController {
 
+    private final DeploymentService deploymentService;
 
-    private final DeploymentService service;
+    public DeploymentController(
+            DeploymentService deploymentService) {
 
-    public DeploymentController(DeploymentService service) {
-        this.service = service;
+        this.deploymentService = deploymentService;
     }
 
-
+    @PreAuthorize(
+            "hasAnyRole('ADMIN', 'DEVOPS')"
+    )
     @PostMapping
     public Deployment createDeployment(
             @RequestBody Deployment deployment) {
 
-        return service.createDeployment(deployment);
+        return deploymentService
+                .createDeployment(deployment);
     }
 
+    @PreAuthorize(
+            "hasAnyRole('ADMIN', 'DEVOPS', 'VIEWER')"
+    )
     @GetMapping
-    public List<Deployment> getAllDeployments(
+    public List<Deployment> getAllDeployments() {
 
-            @RequestParam(required = false)
-            DeploymentStatus status) {
-
-        if (status != null) {
-            return service.getDeploymentsByStatus(status);
-        }
-
-        return service.getAllDeployments();
+        return deploymentService
+                .getAllDeployments();
     }
 
+    @PreAuthorize(
+            "hasAnyRole('ADMIN', 'DEVOPS', 'VIEWER')"
+    )
     @GetMapping("/{id}")
     public Deployment getDeploymentById(
             @PathVariable Long id) {
 
-        return service.getDeploymentById(id);
+        return deploymentService
+                .getDeploymentById(id);
     }
 
+    @PreAuthorize(
+            "hasAnyRole('ADMIN', 'DEVOPS')"
+    )
     @PutMapping("/{id}/status")
     public Deployment updateStatus(
 
             @PathVariable Long id,
 
-            @RequestBody Map<String, String> body) {
+            @RequestBody
+            DeploymentStatusRequest request) {
 
-        DeploymentStatus status =
-                DeploymentStatus.valueOf(
-                        body.get("status"));
-
-        return service.updateStatus(id, status);
+        return deploymentService
+                .updateStatus(
+                        id,
+                        request.getStatus()
+                );
     }
+
+    public static class DeploymentStatusRequest {
+
+        private DeploymentStatus status;
+
+        public DeploymentStatus getStatus() {
+            return status;
+        }
+
+        public void setStatus(
+                DeploymentStatus status) {
+
+            this.status = status;
+        }
+    }
+    @PreAuthorize(
+            "hasRole('ADMIN')"
+    )
     @DeleteMapping("/{id}")
-    public String deleteDeployment(@PathVariable Long id) {
+    public void deleteDeployment(
+            @PathVariable Long id) {
 
-        service.deleteDeployment(id);
-
-        return "Deployment deleted successfully";
-    }
-    @GetMapping("/count/{status}")
-    public long countDeploymentsByStatus(
-            @PathVariable DeploymentStatus status) {
-
-        return service.countDeploymentsByStatus(status);
+        deploymentService
+                .deleteDeployment(id);
     }
 
 }
